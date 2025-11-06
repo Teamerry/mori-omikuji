@@ -194,6 +194,10 @@ setTimeout(()=>document.body.classList.remove('debugShow'), 1200);
   opacity:1 !important; animation:none !important;
   outline: 2px dashed rgba(255,80,0,.6);
 }
+// デバッグ表示ON（5秒見えるままにする）
+document.body.classList.add('debugShow');
+setTimeout(()=>document.body.classList.remove('debugShow'), 5000);
+
 
 
 
