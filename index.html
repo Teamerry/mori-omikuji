@@ -1,102 +1,174 @@
 <!doctype html>
+<html lang="ja">
+<head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>森のおみくじ | Tea Merry</title>
 <style>
+  /* ===== ベース ===== */
   :root{
-    --tea:#6B4E3D;        /* カップ色 */
-    --steam:#ffffff;      /* 湯気色（白） */
+    --ink:#5a3b25;
   }
-  body{margin:0; display:grid; place-items:center; background:#f5efe2; height:100dvh;}
-
-  /* ステージ */
-  .wrap{ position:relative; width:min(360px,90vw); aspect-ratio: 3/2; background:linear-gradient(#8ea389,#6c805f); border-radius:20px; box-shadow:0 10px 24px rgba(0,0,0,.12) inset; overflow:hidden; }
-
-  /* カップ */
-  .cup{ position:absolute; left:50%; bottom:24px; transform:translateX(-50%); width:54%; cursor:pointer; }
-  .cup .bowl{ width:100%; height:auto; aspect-ratio: 260/160; background:
-      radial-gradient(100% 60% at 50% 0%, #b89f7b 0 48%, transparent 49%),
-      radial-gradient(86% 50% at 50% 6%, #6b4e3d 0 46%, transparent 47%),
-      linear-gradient(var(--tea), var(--tea));
-    border-radius:28px 28px 36px 36px/24px 24px 44px 44px;
-    filter: drop-shadow(0 10px 16px rgba(71,52,41,.28));
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
+    background:url('bg_forest.png') center/cover no-repeat fixed; /* ← 背景PNG */
+    display:grid; place-items:center;
   }
-  .cup .handle{
-    position:absolute; right:-10%; bottom:14%;
-    width:28%; height:38%; border:16px solid var(--tea); border-left-color:transparent;
-    border-radius:50%; transform:rotate(-6deg);
-  }
+  .app{ width:min(420px,100vw); height:100dvh; position:relative; overflow:hidden; }
 
-  /* 湯気（3本） */
-  .steam{ position:absolute; left:50%; bottom: calc(24px + 38%); transform:translateX(-50%); width:120px; height:120px; pointer-events:none; }
-  .steam span{
-    position:absolute; bottom:0; left:50%; width:34px; height:60px; margin-left:-17px;
+  /* ===== レイアウト ===== */
+  .stage{position:absolute; inset:0; display:grid; grid-template-rows: 1fr auto; padding:16px}
+  .center{position:relative; display:grid; place-items:center; height:100%}
+
+  /* ===== カード（土台PNG＋文字） ===== */
+  .card{ position:absolute; top:56px; left:50%; transform:translateX(-50%); width:80%; max-width:360px; opacity:0; transform-origin:50% 85%}
+  .card img{width:100%; display:block}  /* card_base.png を表示 */
+  .card .t1{ position:absolute; inset:0; display:grid; align-content:center; padding:18px 20px 8px; font-weight:700; font-size:clamp(22px,6.2vw,28px); line-height:1.15;}
+  .card .t2{ position:absolute; left:20px; right:20px; bottom:16px; font-size:clamp(13px,4.2vw,15.5px); line-height:1.6}
+
+  /* ===== 吹き出し & キャラ（同時に出す） ===== */
+  .balloon{ position:absolute; right:12%; top:46%; width:56%; max-width:260px; opacity:0 }
+  .balloonText{ position:absolute; right:16%; top:49%; width:50%; max-width:230px; padding:14px 10px; text-align:center; font-weight:700; opacity:0 }
+  .talker{ position:absolute; right:6%; top:48%; width:26%; max-width:120px; opacity:0; filter:drop-shadow(0 8px 16px rgba(71,52,41,.22)) }
+
+  /* ===== カップPNG ===== */
+  .cup{ position:absolute; left:50%; bottom:104px; transform:translateX(-50%); width:64%; cursor:pointer; filter:drop-shadow(0 10px 16px rgba(71,52,41,.25)); }
+  .cup:active{ transform:translateX(-50%) translateY(1px) scale(.996) }
+
+  /* ===== 湯気（画像不要のCSSアニメ） ===== */
+  .steam{ position:absolute; left:50%; bottom:calc(104px + 44%); transform:translateX(-50%); width:120px; height:120px; pointer-events:none }
+  .steam i{ position:absolute; bottom:0; width:36px; height:62px; left:50%; margin-left:-18px;
     background:
-      radial-gradient(40px 26px at 50% 70%, var(--steam) 0 45%, transparent 55%),
-      radial-gradient(34px 22px at 50% 36%, var(--steam) 0 45%, transparent 55%);
-    filter: blur(2px); opacity:0; transform: translateY(10px) scale(.9);
+      radial-gradient(40px 26px at 50% 70%, #fff 0 45%, transparent 55%),
+      radial-gradient(34px 22px at 50% 36%, #fff 0 45%, transparent 55%);
+    filter:blur(2px); opacity:0; transform:translateY(10px) scale(.9)
   }
-  .steam span:nth-child(1){ left:30%; }
-  .steam span:nth-child(2){ left:50%; }
-  .steam span:nth-child(3){ left:70%; }
-
-  /* アニメ（発生時のみ再生） */
-  .steam.on span{
-    animation: rise 2.6s ease-in-out forwards;
-  }
-  .steam.on span:nth-child(2){ animation-delay:.18s }
-  .steam.on span:nth-child(3){ animation-delay:.36s }
-
+  .steam i:nth-child(1){left:30%}
+  .steam i:nth-child(2){left:50%}
+  .steam i:nth-child(3){left:70%}
+  .steam.on i{animation:rise 2.6s ease-in-out forwards}
+  .steam.on i:nth-child(2){animation-delay:.18s}
+  .steam.on i:nth-child(3){animation-delay:.36s}
   @keyframes rise{
-    0%   { opacity:0; transform: translateY(10px) scale(.9); filter: blur(2px) }
-    15%  { opacity:.45 }
-    55%  { opacity:.55; transform: translateY(-42px) scale(1.03) rotate(-2deg) }
-    100% { opacity:0; transform: translateY(-80px) scale(1.06) rotate(-4deg); filter: blur(4px) }
+    0%{opacity:0;transform:translateY(10px) scale(.9)}
+    20%{opacity:.45}
+    60%{opacity:.55;transform:translateY(-42px) scale(1.02)}
+    100%{opacity:0;transform:translateY(-80px) scale(1.06)}
   }
 
-  /* クリックの手ごたえ（小さく沈む） */
-  .cup:active .bowl{ transform:translateY(1px) scale(.996) }
-</style>
+  /* ===== ボタン画像 ===== */
+  .btns{ position:absolute; left:0; right:0; bottom:18px; display:flex; justify-content:center; gap:14px }
+  .btns img{ height:44px; object-fit:contain; cursor:pointer; filter:drop-shadow(0 6px 12px rgba(71,52,41,.18)) }
+  .btns a{ line-height:0 }
 
-<div class="wrap" id="stage">
-  <div class="cup" id="cup" aria-label="カップをクリックしておみくじを引く" role="button">
-    <div class="bowl"></div>
-    <div class="handle"></div>
-  </div>
-  <div class="steam" id="steam">
-    <span></span><span></span><span></span>
-  </div>
-</div>
+  /* ===== アニメーション・ユーティリティ ===== */
+  .fadeIn{animation:fadeIn .35s ease-out forwards}
+  .popIn{animation:popIn .26s ease-out forwards}
+  .floatIn{animation:floatIn .6s cubic-bezier(.22,1,.36,1) forwards}
+  @keyframes fadeIn{from{opacity:0} to{opacity:1}}
+  @keyframes popIn{from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)}}
+  @keyframes floatIn{from{opacity:0; transform:translate(-50%,16px)} to{opacity:1; transform:translate(-50%,0)}}
+</style>
+</head>
+<body>
+  <main class="app" role="application" aria-label="森のおみくじ">
+    <section class="stage">
+      <div class="center">
+        <!-- カップ（クリックで湯気→結果） -->
+        <img id="cup" class="cup" src="cup.png" alt="ティーカップ">
+
+        <!-- 湯気 -->
+        <div id="steam" class="steam" aria-hidden="true"><i></i><i></i><i></i></div>
+
+        <!-- 結果カード -->
+        <figure id="card" class="card">
+          <img src="card_base.png" alt="">
+          <figcaption>
+            <div id="title" class="t1">ほかほか<br>大吉</div>
+            <div id="body"  class="t2">あたたかい飲み物を両手で包むように、あなたのまわりにも静かなぬくもりが集まる日。どんな話も、湯気の向こうでやさしくまとまっていきます。</div>
+          </figcaption>
+        </figure>
+
+        <!-- 吹き出し & 文字 & キャラ（同時に） -->
+        <img id="balloon" class="balloon" src="balloon.png" alt="">
+        <div id="balloonText" class="balloonText">ゆっくりでいいよ。湯気が教えてくれるから。</div>
+        <img id="talker" class="talker" src="fairy.png" alt="森の精霊">
+      </div>
+
+      <!-- ボタン -->
+      <div class="btns">
+        <img id="okawari" src="okawari.png" alt="おかわり？">
+        <a id="homeLink" href="#" aria-label="TeaMerryの森へ">
+          <img src="home_sign.png" alt="TeaMerryの森へ">
+        </a>
+      </div>
+    </section>
+  </main>
 
 <script>
-  const cup   = document.getElementById('cup');
+  // ===== 要素参照 =====
+  const cup = document.getElementById('cup');
   const steam = document.getElementById('steam');
-  const stage = document.getElementById('stage');
+  const card = document.getElementById('card');
+  const title = document.getElementById('title');
+  const body  = document.getElementById('body');
+  const balloon = document.getElementById('balloon');
+  const balloonText = document.getElementById('balloonText');
+  const talker = document.getElementById('talker');
+  const okawari = document.getElementById('okawari');
+  const homeLink = document.getElementById('homeLink');
 
-  function showSteam(){
-    // 連打対策：一度消してから付け直す
-    steam.classList.remove('on');
-    void steam.offsetWidth; // reflow でリセット
-    steam.classList.add('on');
+  // === ここにWixのホームURLを入れてね ===
+  homeLink.href = 'https://あなたのWixホームURL';
 
-    // 2.2秒後くらいに「結果を出す」イベントを投げる（任意でフック）
-    setTimeout(()=> {
-      stage.dispatchEvent(new CustomEvent('fortune:ready'));
-    }, 2200);
+  // 運勢（必要に応じて追加OK）
+  const fortunes = [
+    {t:'ほかほか<br>大吉', b:'あたたかい飲み物を両手で包むように、あなたのまわりにも静かなぬくもりが集まる日。どんな話も、湯気の向こうでやさしくまとまっていきます。', w:'ぬくもりも、カフェインも取りすぎ注意。', talker:'fairy.png'},
+    {t:'もこもこ<br>中吉', b:'誰かの笑い声が、不意にあなたをやわらげる。無理に元気を出さなくても、湯気のように気持ちは上向き。今日は、笑われるより笑う方がお得です。', w:'笑いジワは運のしるし。', talker:'fairy.png'},
+    {t:'ぬるま湯<br>小吉', b:'今日は、あたため直しの日。ぬるめの紅茶みたいに、じんわりと心がほどけていく。あせらなくていい、味が出るのはもう少し先。', w:'ゆっくりでいいよ。湯気が教えてくれるから。', talker:'fairy.png'},
+    {t:'ティーバッグ<br>末吉', b:'少し渋い一日。でも、その渋みが深みになる。お湯の中で静かに広がるように、ゆっくり整っていく運気。今日は焦らず、ほどよく染み出す時間を楽しんで。', w:'急須をゆらすみたいに、気持ちも軽くね。', talker:'fairy.png'}
+  ];
+
+  // リセットして見せ直す
+  function resetViews(){
+    [card, balloon, balloonText, talker].forEach(el=>{
+      el.style.opacity = 0; el.style.animation = 'none'; void el.offsetWidth;
+    });
   }
 
-  cup.addEventListener('click', showSteam);
-
-  // ここに結果表示ロジックを繋ぐ（例）
-  stage.addEventListener('fortune:ready', () => {
-    // 例：アラートの代わりに、ここでカードを表示する関数を呼ぶ
-    // showFortuneCard();
-    console.log('湯気完了 → 結果表示へ');
-  });
-
-  // モーション少なめ設定を尊重
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    document.head.insertAdjacentHTML('beforeend', `
-      <style>.steam.on span{ animation: rise 1.2s linear forwards }</style>
-    `);
+  // 湯気再生
+  function playSteam(){
+    steam.classList.remove('on'); void steam.offsetWidth; steam.classList.add('on');
+    resetViews();
+    setTimeout(showFortune, 2200); // 湯気後に結果
   }
+
+  // 結果表示（カード → キャラ＆吹き出し 同時）
+  function showFortune(){
+    const f = fortunes[Math.floor(Math.random()*fortunes.length)];
+    title.innerHTML = f.t;
+    body.textContent = f.b;
+    balloonText.textContent = f.w;
+    talker.src = f.talker;
+
+    card.style.animation = 'floatIn .6s cubic-bezier(.22,1,.36,1) forwards';
+    setTimeout(()=>{
+      talker.style.animation  = 'fadeIn .28s ease-out forwards';
+      balloon.style.animation = 'popIn .26s ease-out forwards';
+      balloonText.style.animation = 'fadeIn .22s ease-out forwards';
+    }, 260);
+  }
+
+  // イベント
+  cup.addEventListener('click', playSteam);
+  okawari.addEventListener('click', playSteam);
+
+  // 初回は静かにカードだけ出す
+  setTimeout(()=>{ card.classList.add('floatIn'); }, 400);
 </script>
+</body>
+</html>
