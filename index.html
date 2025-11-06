@@ -179,4 +179,9 @@
 .debugShow .balloon,
 .debugShow .balloonText,
 .debugShow .talker { opacity:1 !important; animation:none !important; }
+// 既存の <script> の一番下あたりに追加
+document.body.classList.add('debugShow');
+// ↓1秒後にデバッグ表示を解除（通常アニメに戻す）
+setTimeout(()=>document.body.classList.remove('debugShow'), 1200);
+
 
