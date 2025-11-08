@@ -40,16 +40,22 @@ body{
 
 /* クリックのヒント */
 .hint{
-  position:absolute; left:50%; bottom:168px; transform:translateX(-50%);
-  padding:8px 12px; border-radius:999px;
-  color:#5a3b25; background:rgba(255,255,255,.88);
-  font-weight:700; font-size:14px; z-index:4;
+  /* ヒント */
+.hint{
+  position:absolute;
+  left:50%;
+  bottom:56px;              /* ← ボタンの少し上に固定 */
+  transform:translateX(-50%);
+  padding:8px 12px;
+  border-radius:999px;
+  color:#5a3b25;
+  background:rgba(255,255,255,.85);
+  font-weight:700;
+  font-size:14px;
   box-shadow:0 6px 14px rgba(71,52,41,.12);
   animation:hintPulse 1.8s ease-in-out infinite;
-}
-@keyframes hintPulse{
-  0%,100%{ transform:translateX(-50%) translateY(0); opacity:.95 }
-  50%{    transform:translateX(-50%) translateY(-2px); opacity:1 }
+  pointer-events:none;      /* ← これでタップを邪魔しない */
+  z-index:4;                /* カップより上に */
 }
 
 /* 湯気（CSS） */
@@ -271,3 +277,4 @@ cup.addEventListener('keydown', (e)=>{
 </script>
 </body>
 </html>
+
