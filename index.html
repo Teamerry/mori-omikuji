@@ -127,7 +127,38 @@
     0%{ opacity:0; transform:translateY(10px) scale(.95); }
     60%{ opacity:1; transform:translateY(-4px) scale(1.02); }
     100%{ opacity:1; transform:translateY(0) scale(1); }
-  }
+  /* ========== レイアウト微調整（縦長スマホ向け） ========== */
+@media (max-width: 520px) {
+  .card{ top: 68px; }                       /* 結果カードを少し下へ */
+  .talkerA{ left: 76%; top: 132px; }        /* 小さい妖精（カード脇） */
+  .balloon{ left: 42%; top: 265px; width: 58%; }
+  .balloonText{ left: 46%; top: 286px; width: 50%; }
+  .talkerB{ left: 60%; top: 342px; }
+  .cup{ bottom: 108px; width: 66%; }        /* カップは今の感じを維持 */
+  .btns{ bottom: 16px; }                    /* ボタンの余白ちょい増し */
+}
+
+/* ========== 横長や高さが低い画面対策（文字やUIが詰まる対策） ========== */
+@media (max-height: 640px) {
+  .card{ top: 52px; }
+  .balloon{ top: 238px; }
+  .balloonText{ top: 258px; }
+  .talkerA{ top: 114px; }
+  .talkerB{ top: 318px; }
+  .cup{ bottom: 96px; width: 62%; }
+}
+
+/* ========== PC（デスクトップ）で大きめ表示 ========== */
+@media (min-width: 768px) {
+  .app{ width: 600px; }                     /* ← ここで全体サイズを拡大 */
+  .card{ top: 84px; }
+  .talkerA{ left: 78%; top: 150px; width: 18%; }
+  .balloon{ left: 45%; top: 320px; width: 52%; }
+  .balloonText{ left: 49%; top: 340px; width: 44%; }
+  .talkerB{ left: 62%; top: 374px; width: 17%; }
+  .cup{ bottom: 128px; width: 60%; }
+  .btns{ bottom: 22px; }
+}
 </style>
 </head>
 <body>
@@ -260,3 +291,4 @@
 </script>
 </body>
 </html>
+
