@@ -240,10 +240,58 @@
       },700);
     },2200);
   }
+/* === SmartPhone (〜480px) 調整だけ上書き === */
+@media (max-width: 480px){
 
+  /* カップ：少し小さく＋下げる */
+  .cup{
+    width: 54vw;      /* 64→54：小さく */
+    bottom: 8vh;      /* 14→8：下げる */
+  }
+
+  /* カード：少しだけ上へ＆広めに */
+  .card{
+    top: 6vh;         /* 8→6：上に */
+    width: 86%;       /* 82→86：広め */
+  }
+
+  /* 吹き出し＆テキスト：全体をちょい下げ＆広げる */
+  .balloon{
+    top: 33vh;        /* 30→33 */
+    width: 62vw;      /* 54→62 */
+  }
+  .balloonText{
+    top: 34.6vh;      /* 31.5→34.6 */
+    width: 56vw;      /* 48→56 */
+  }
+
+  /* 先に出る妖精A：カード右上で見切れないよう微調整 */
+  .talkerA{
+    left: 84%;
+    top: 15vh;
+    width: 20vw;      /* 18→20 */
+  }
+
+  /* ボタン行：間隔＆位置 */
+  .btns{
+    bottom: 3vh;      /* 2.4→3：少し上げる（見やすく） */
+    gap: 2.2vh;       /* 間隔ひろめ */
+  }
+
+  /* おかわりボタンの高さ（相対大きさの基準） */
+  #okawari{
+    height: 5.2vh;    /* 既定4.6→5.2 ちょい大きく */
+  }
+
+  /* ホーム看板だけ大きめに */
+  #homeLink img{
+    height: 6.4vh;    /* ←ここで看板をドンと大きく */
+  }
+}
   // ===== イベント =====
   cup.addEventListener('click', play, {passive:true});
   okawari.addEventListener('click', ()=>{ init(); play(); }, {passive:true});
 </script>
 </body>
 </html>
+
