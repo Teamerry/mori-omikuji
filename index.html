@@ -5,126 +5,144 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>森のおみくじ | Tea Merry</title>
 
-<!-- 先読み（体感を軽く） -->
+<!-- 先読み -->
 <link rel="preload" as="image" href="bg_forest.png">
 <link rel="preload" as="image" href="card_base.png">
-<link rel="preload" as="image" href="fairy.png">          <!-- 先に出る妖精 -->
+<link rel="preload" as="image" href="fairy.png">
+<link rel="preload" as="image" href="buddy.png">
 <link rel="preload" as="image" href="balloon.png">
 <link rel="preload" as="image" href="cup.png">
-<link rel="preload" as="image" href="okawari.png">
-<link rel="preload" as="image" href="home_sign.png">
-<!-- ツッコミ役（6体まであれば自動で使う） -->
-<link rel="preload" as="image" href="buddy1.png">
-<link rel="preload" as="image" href="buddy2.png">
-<link rel="preload" as="image" href="buddy3.png">
-<link rel="preload" as="image" href="buddy4.png">
-<link rel="preload" as="image" href="buddy5.png">
-<link rel="preload" as="image" href="buddy6.png">
 
 <style>
-  :root{ --ink:#5a3b25; }
-  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{ height:100%; }
-  body{
-    margin:0; color:var(--ink);
-    font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
-    background:url('bg_forest.png') center/cover fixed no-repeat;
-    display:grid; place-items:center;
-  }
+:root{
+  --ink:#5a3b25;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  margin:0; color:var(--ink);
+  font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;
+  background:url('bg_forest.png') center/cover fixed no-repeat;
+  display:grid; place-items:center;
+}
+/* 中央のアプリ枠：PCでも小さすぎず、左右が切れない幅に固定 */
+.app{
+  width:min(560px,100vw);   /* ←PCで“めちゃくちゃ小さい”を防ぐ */
+  height:100dvh;
+  position:relative;
+  overflow:hidden;
+}
 
-  /* キャンバス */
-  .app{ width:min(100vw, 92vh); max-width:720px; height:100dvh; position:relative; overflow:hidden; }
-  @media (min-width:768px){ .app{ width:clamp(420px, 52vw, 720px); } }
-  .stage{ position:absolute; inset:0; }
+/* レイヤー共通 */
+.hidden{ display:none !important; }
+.center{ position:absolute; inset:0; }
 
-  /* ===== 配置は画面割合（vh / vw）で統一 ===== */
+/* カップ：常に中央下・左右切れないよう“clamp”で制御 */
+.cup{
+  position:absolute; left:50%; bottom:96px; transform:translateX(-50%);
+  width:clamp(220px, 42vw, 420px);
+  cursor:pointer; z-index:10;
+  filter:drop-shadow(0 12px 18px rgba(71,52,41,.25));
+}
 
-  /* カード（結果） */
-  .card{
-    position:absolute; left:50%; top:8vh; transform:translateX(-50%);
-    width:82%; opacity:0; transform-origin:50% 85%; z-index:3;
-  }
-  .card img{ width:100%; display:block; }
-  .t1{ position:absolute; inset:0; display:grid; align-content:center;
-       padding:2.4vh 2.6vh 1.2vh; font-weight:700; font-size:clamp(20px, 3.2vh, 28px); line-height:1.15; }
-  .t2{ position:absolute; left:2.4vh; right:2.4vh; bottom:1.8vh; font-size:clamp(12px, 1.9vh, 15.5px); line-height:1.7; }
+/* クリックヒント（カップの下、タップを邪魔しない） */
+.hint{
+  position:absolute; left:50%; transform:translateX(-50%);
+  bottom:52px; padding:10px 14px; border-radius:999px;
+  background:rgba(255,255,255,.9); color:var(--ink); font-weight:700;
+  box-shadow:0 6px 14px rgba(71,52,41,.12);
+  pointer-events:none;   /* ← これでカップが必ずタップ可能 */
+  animation:hintPulse 1.8s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{ transform:translateX(-50%) translateY(0); opacity:.95 }
+  50%{    transform:translateX(-50%) translateY(-2px); opacity:1 }
+}
 
-  /* ふきだし・テキスト・キャラ */
-  .balloon{ position:absolute; left:50%; top:30vh; width:54vw; transform:translateX(-50%); opacity:0; z-index:3; }
-  .balloonText{ position:absolute; left:50%; top:31.5vh; width:48vw; transform:translateX(-50%); text-align:center; font-weight:700; opacity:0; z-index:3; }
-  .talkerA{ position:absolute; left:76%; top:14vh; width:18vw; transform:translateX(-50%); opacity:0; z-index:2; filter:drop-shadow(0 0.8vh 1.6vh rgba(71,52,41,.22)); }
-  .talkerB{ position:absolute; left:65%; top:37vh; width:20vw; transform:translateX(-50%); opacity:0; z-index:3; filter:drop-shadow(0 0.8vh 1.6vh rgba(71,52,41,.22)); }
+/* 湯気（CSSアニメ） */
+.steam{ position:absolute; left:50%; transform:translateX(-50%); width:120px; height:120px; bottom:calc(96px + 44%); z-index:11; pointer-events:none; }
+.steam i{ position:absolute; bottom:0; width:36px; height:62px; left:50%; margin-left:-18px;
+  background:
+    radial-gradient(40px 26px at 50% 70%, #fff 0 45%, transparent 55%),
+    radial-gradient(34px 22px at 50% 36%, #fff 0 45%, transparent 55%);
+  filter:blur(2px); opacity:0; transform:translateY(10px) scale(.9);
+}
+.steam i:nth-child(1){ left:30% } .steam i:nth-child(2){ left:50% } .steam i:nth-child(3){ left:70% }
+.steam.on i{ animation:rise 2.6s ease-in-out forwards; }
+.steam.on i:nth-child(2){ animation-delay:.18s } .steam.on i:nth-child(3){ animation-delay:.36s }
+@keyframes rise{
+  0%{ opacity:0; transform:translateY(10px) scale(.9) }
+  20%{ opacity:.45 }
+  60%{ opacity:.55; transform:translateY(-42px) scale(1.02) }
+  100%{ opacity:0; transform:translateY(-80px) scale(1.06) }
+}
 
-  /* カップ（クリック） */
-  .cup{
-    position:absolute; left:50%; bottom:14vh; transform:translateX(-50%);
-    width:64vw; cursor:pointer; filter:drop-shadow(0 1vh 1.6vh rgba(71,52,41,.25)); z-index:1;
-  }
-  .cup:active{ transform:translateX(-50%) translateY(0.1vh) scale(.996); }
+/* 結果カード（カップの上側に固定） */
+.card{
+  position:absolute; top:56px; left:50%; transform:translateX(-50%) scale(1);
+  width:86%; max-width:460px; opacity:0; z-index:20; transform-origin:50% 85%;
+}
+.card>img{ width:100%; display:block }
+.card .t1{ position:absolute; inset:0; display:grid; align-content:center; padding:18px 20px 8px; font-weight:700; font-size:clamp(22px,6.2vw,28px); line-height:1.15; }
+.card .t2{ position:absolute; left:20px; right:20px; bottom:16px; font-size:clamp(13px,4.2vw,15.5px); line-height:1.7; }
 
-  /* ヒント（カップの下に表示） */
-  .hint{
-    position:absolute; left:50%; bottom:7vh; transform:translateX(-50%);
-    padding:.9vh 1.6vh; border-radius:999px; color:#5a3b25; background:rgba(255,255,255,.9);
-    font-weight:700; font-size:clamp(12px,1.8vh,14px); box-shadow:0 .6vh 1.4vh rgba(71,52,41,.12);
-    animation:hintPulse 1.8s ease-in-out infinite;
-  }
-  @keyframes hintPulse{
-    0%,100%{ transform:translateX(-50%) translateY(0); opacity:.95 }
-    50%{    transform:translateX(-50%) translateY(-2px); opacity:1 }
-  }
+/* 妖精A（カードと一緒に出る/固定） */
+.talkerA{ position:absolute; top:92px; right:18%; width:92px; z-index:22; opacity:0;
+  filter:drop-shadow(0 8px 16px rgba(71,52,41,.22));
+}
 
-  /* 湯気（CSSアニメーション） */
-  .steam{ position:absolute; left:50%; bottom:calc(14vh + 28vw); transform:translateX(-50%); width:28vw; height:28vw; pointer-events:none; z-index:2; }
-  .steam i{ position:absolute; bottom:0; width:6.2vw; height:10vw; left:50%; margin-left:-3.1vw;
-    background:
-      radial-gradient(8vw 5vw at 50% 70%, #fff 0 45%, transparent 55%),
-      radial-gradient(7vw 4vw  at 50% 36%, #fff 0 45%, transparent 55%);
-    filter:blur(2px); opacity:0; transform:translateY(10px) scale(.9);
-  }
-  .steam i:nth-child(1){ left:30%; } .steam i:nth-child(2){ left:50%; } .steam i:nth-child(3){ left:70%; }
-  .steam.on i{ animation:rise 2.6s ease-in-out forwards; }
-  .steam.on i:nth-child(2){ animation-delay:.18s; }
-  .steam.on i:nth-child(3){ animation-delay;.36s; }
-  @keyframes rise{
-    0%{ opacity:0; transform:translateY(10px) scale(.9); }
-    20%{ opacity:.45; }
-    60%{ opacity:.55; transform:translateY(-8vh) scale(1.02); }
-    100%{ opacity:0; transform:translateY(-14vh) scale(1.06); }
-  }
+/* 吹き出し・妖精B（少し遅れて） */
+.balloon{ position:absolute; top:220px; left:calc(50% - 10px); width:56%; max-width:300px; opacity:0; z-index:23; transform:translateX(-50%); }
+.balloonText{ position:absolute; top:238px; left:50%; transform:translateX(-50%); width:50%; max-width:270px; padding:14px 10px; text-align:center; font-weight:700; opacity:0; z-index:24; }
+.talkerB{ position:absolute; top:260px; left:calc(50% + 110px); width:100px; opacity:0; z-index:24;
+  filter:drop-shadow(0 8px 16px rgba(71,52,41,.22));
+}
 
-  /* ボタン */
-  .btns{ position:absolute; left:0; right:0; bottom:2.4vh; display:flex; justify-content:center; gap:1.6vh; z-index:6; opacity:0; pointer-events:none; transition:opacity .28s ease-out; }
-  .btns img{ height:4.6vh; object-fit:contain; cursor:pointer; filter:drop-shadow(0 .6vh 1.2vh rgba(71,52,41,.18)); }
-  .btns.on{ opacity:1; pointer-events:auto; }
+/* ボタン群 */
+.btns{ position:absolute; left:0; right:0; bottom:18px; display:flex; justify-content:center; gap:16px; z-index:30; opacity:0; pointer-events:none; transition:opacity .28s ease-out; }
+.btns img{ height:44px; object-fit:contain; cursor:pointer; filter:drop-shadow(0 6px 12px rgba(71,52,41,.18)); }
+.btns.on{ opacity:1; pointer-events:auto }
 
-  /* アニメーション */
-  .fadeIn{ animation:fadeIn .3s ease-out forwards; }
-  .popIn{ animation:popIn .24s ease-out forwards; }
-  .floatIn{ animation:floatIn .6s cubic-bezier(.22,1,.36,1) forwards; }
-  .bounceIn{ animation:bounceIn .34s cubic-bezier(.12,.8,.2,1.1) forwards; }
-  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
-  @keyframes popIn{ from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)} }
-  @keyframes floatIn{ from{opacity:0; transform:translate(-50%,16px)} to{opacity:1; transform:translate(-50%,0)} }
-  @keyframes bounceIn{
-    0%{ opacity:0; transform:translateY(10px) scale(.95); }
-    60%{ opacity:1; transform:translateY(-4px) scale(1.02); }
-    100%{ opacity:1; transform:translateY(0) scale(1); }
-  }
+/* アニメ */
+.fadeIn{ animation:fadeIn .28s ease-out forwards }
+.popIn{ animation:popIn .26s ease-out forwards }
+.floatIn{ animation:floatIn .6s cubic-bezier(.22,1,.36,1) forwards }
+.bounceIn{ animation:bounceIn .34s cubic-bezier(.12,.8,.2,1.1) forwards }
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+@keyframes popIn{ from{opacity:0; transform:translateX(-50%) scale(.96)} to{opacity:1; transform:translateX(-50%) scale(1)} }
+@keyframes floatIn{ from{opacity:0; transform:translateX(-50%) translateY(16px)} to{opacity:1; transform:translateX(-50%) translateY(0)} }
+@keyframes bounceIn{
+  0%{ opacity:0; transform:translateY(10px) scale(.95) }
+  60%{ opacity:1; transform:translateY(-4px) scale(1.02) }
+  100%{ opacity:1; transform:translateY(0) scale(1) }
+}
+
+/* ==== スマホ専用の微調整 ==== */
+@media (max-width: 480px){
+  .cup{ width:54vw; bottom:8vh }
+  .hint{ bottom:3.4vh }
+  .card{ top:5.6vh; width:88% }
+  .talkerA{ top:10vh; right:12%; width:19vw }
+  .balloon{ top:31vh; width:64vw }
+  .balloonText{ top:33.2vh; width:58vw }
+  .talkerB{ top:37vh; left:auto; right:6%; width:22vw }
+  .btns{ bottom:2.6vh; gap:2vh }
+  #okawari{ height:5.2vh }
+  #homeLink img{ height:6.4vh } /* 看板を少し大きく */
+}
 </style>
 </head>
 <body>
   <main class="app" role="application" aria-label="森のおみくじ">
-    <section class="stage">
-      <!-- カップ（最初はこれだけ＋ヒント） -->
+    <div class="center">
+
+      <!-- カップ＆ヒント＆湯気 -->
       <img id="cup" class="cup" src="cup.png" alt="ティーカップ">
       <div id="hint" class="hint">カップをクリックしてね</div>
-
-      <!-- 湯気 -->
-      <div id="steam" class="steam" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div id="steam" class="steam hidden" aria-hidden="true"><i></i><i></i><i></i></div>
 
       <!-- 結果カード -->
-      <figure id="card" class="card" aria-live="polite">
+      <figure id="card" class="card hidden" aria-live="polite">
         <img src="card_base.png" alt="">
         <figcaption>
           <div id="title" class="t1"></div>
@@ -133,165 +151,104 @@
       </figure>
 
       <!-- 妖精A（カードと同時） -->
-      <img id="talkerA" class="talkerA" src="fairy.png" alt="森の精霊">
+      <img id="talkerA" class="talkerA hidden" src="fairy.png" alt="森の精霊">
 
-      <!-- 吹き出し & テキスト & ツッコミ役B（後出し） -->
-      <img id="balloon" class="balloon" src="balloon.png" alt="">
-      <div id="balloonText" class="balloonText"></div>
-      <img id="talkerB" class="talkerB" src="buddy1.png" alt="ツッコミ役">
+      <!-- 吹き出し＆テキスト＆妖精B（遅れて） -->
+      <img id="balloon" class="balloon hidden" src="balloon.png" alt="">
+      <div id="balloonText" class="balloonText hidden"></div>
+      <img id="talkerB" class="talkerB hidden" src="buddy.png" alt="ツッコミ役">
+    </div>
 
-      <!-- ボタン -->
-      <div class="btns" id="btns">
-        <img id="okawari" src="okawari.png" alt="おかわり？">
-        <a id="homeLink" href="#" aria-label="TeaMerryの森へ">
-          <img src="home_sign.png" alt="TeaMerryの森へ">
-        </a>
-      </div>
-    </section>
+    <!-- ボタン -->
+    <div class="btns" id="btns">
+      <img id="okawari" src="okawari.png" alt="おかわり？">
+      <a id="homeLink" href="#" aria-label="TeaMerryの森へ">
+        <img src="home_sign.png" alt="TeaMerryの森へ">
+      </a>
+    </div>
   </main>
 
 <script>
-  // ===== 要素 =====
-  const cup = document.getElementById('cup');
-  const hint = document.getElementById('hint');
-  const steam = document.getElementById('steam');
-  const card  = document.getElementById('card');
-  const title = document.getElementById('title');
-  const body  = document.getElementById('body');
-  const balloon = document.getElementById('balloon');
-  const balloonText = document.getElementById('balloonText');
-  const talkerA = document.getElementById('talkerA');
-  const talkerB = document.getElementById('talkerB');
-  const btns = document.getElementById('btns');
-  const okawari = document.getElementById('okawari');
-  const homeLink = document.getElementById('homeLink');
+/* ===== 要素 ===== */
+const cup = document.getElementById('cup');
+const hint = document.getElementById('hint');
+const steam = document.getElementById('steam');
+const card = document.getElementById('card');
+const title = document.getElementById('title');
+const body  = document.getElementById('body');
+const talkerA = document.getElementById('talkerA');
+const balloon = document.getElementById('balloon');
+const balloonText = document.getElementById('balloonText');
+const talkerB = document.getElementById('talkerB');
+const btns = document.getElementById('btns');
+const okawari = document.getElementById('okawari');
+const homeLink = document.getElementById('homeLink');
 
-  // ★WixホームURLを書き換えてね
-  homeLink.href = 'https://（あなたのWixホームURL）';
+/* ★WixホームURL（あとで差し替え） */
+homeLink.href = 'https://あなたのWixホームURL';
 
-  // ===== おみくじ（本文＋ツッコミ） =====
-  const fortunes = [
-    {t:'ほかほか<br>大吉', b:'あたたかい飲み物を両手で包むように、あなたのまわりにも静かなぬくもりが集まる日。どんな話も、湯気の向こうでやさしくまとまっていきます。', q:'あったまったら、やさしさもよく出る。'},
-    {t:'もこもこ<br>中吉', b:'誰かの笑い声が、不意にあなたをやわらげる。無理に元気を出さなくても、湯気のように気持ちは上向き。今日は、笑われるより笑う方がお得です。', q:'笑いジワ、今日のラッキー線。'},
-    {t:'ぬるま湯<br>小吉', b:'今日は、あたため直しの日。ぬるめの紅茶みたいに、じんわりと心がほどけていく。あせらなくていい、味が出るのはもう少し先。', q:'せかさない。湯気のペースで。'},
-    {t:'ティーバッグ<br>末吉', b:'少し渋い一日。でも、その渋みが深みになる。お湯の中で静かに広がるように、ゆっくり整っていく運気。今日は焦らず、ほどよく染み出す時間を楽しんで。', q:'渋みはコクの予告状。'}
-  ];
+/* ===== おみくじ内容 + ツッコミ ===== */
+const fortunes = [
+  {t:'ほかほか<br>大吉', b:'あたたかい飲み物を両手で包むように、あなたのまわりにも静かなぬくもりが集まる日。どんな話も、湯気の向こうでやさしくまとまっていきます。', q:'あったまったら、やさしさもよく出る。'},
+  {t:'もこもこ<br>中吉', b:'誰かの笑い声が、不意にあなたをやわらげる。無理に元気を出さなくても、湯気のように気持ちは上向き。今日は、笑われるより笑う方がお得です。', q:'笑いジワ、今日のラッキー線。'},
+  {t:'ぬるま湯<br>小吉', b:'今日は、あたため直しの日。ぬるめの紅茶みたいに、じんわりと心がほどけていく。焦らなくていい、味が出るのはもう少し先。', q:'せかさない。湯気のペースで。'},
+  {t:'ティーバッグ<br>末吉', b:'少し渋い一日。でも、その渋みが深みになる。お湯の中で静かに広がるように、ゆっくり整っていく運気。今日は焦らず、ほどよく染み出す時間を楽しんで。', q:'渋みはコクの予告状。'}
+];
 
-  // ===== ツッコミ役（buddy1.png～buddy6.png があれば自動で候補に追加） =====
-  const buddies = [];
-  for(let i=1;i<=6;i++){
-    buddies.push(`buddy${i}.png`);
-  }
-  // 読み込み失敗なら fairy.png にフォールバック
+/* ===== ユーティリティ ===== */
+const hide = el => { el.classList.add('hidden'); el.style.opacity = 0; el.style.animation='none'; }
+const show = (el, anim) => { el.classList.remove('hidden'); el.style.animation = anim||''; }
+
+/* ===== 初期化（最初はカップ＋ヒントのみ） ===== */
+function init(){
+  show(cup);  // カップは常に表示
+  show(hint); // ヒントは出す
+  hide(steam); hide(card); hide(talkerA); hide(balloon); hide(balloonText); hide(talkerB);
+  btns.classList.remove('on');
+  title.innerHTML = ''; body.textContent=''; balloonText.textContent='';
+  // 画像フォールバック：buddy.png が無ければ fairy.png を使う
   talkerB.onerror = ()=> talkerB.src = 'fairy.png';
-
-  // ===== ユーティリティ =====
-  function hide(el){
-    el.style.opacity = 0;
-    el.style.animation = 'none';
-    void el.offsetWidth;
-  }
-  function show(el, anim){ el.style.opacity = 1; el.style.animation = anim; }
-
-  // ===== 初期化：カップ＋ヒントだけ表示 =====
-  function init(){
-    [card, balloon, balloonText, talkerA, talkerB].forEach(hide);
-    btns.classList.remove('on');
-    steam.classList.remove('on');
-    title.innerHTML=''; body.textContent=''; balloonText.textContent='';
-    hint.style.display='block'; hint.style.opacity=1;
-  }
-  init();
-
-  let playing = false;
-
-  // ===== クリック → 湯気 → カード＋妖精A →（遅れて）吹き出し＋B＋ボタン =====
-  function play(){
-    if(playing) return; playing = true;
-
-    [card, balloon, balloonText, talkerA, talkerB].forEach(hide);
-    btns.classList.remove('on');
-    hint.style.opacity=0; hint.style.display='none';
-
-    // 結果決定
-    const f = fortunes[Math.floor(Math.random()*fortunes.length)];
-    title.innerHTML = f.t;
-    body.textContent = f.b;
-    balloonText.textContent = f.q;
-
-    // ツッコミ役ランダム（buddy1～6 が無ければ onerror で fairy.png）
-    talkerB.src = buddies[Math.floor(Math.random()*buddies.length)];
-
-    // 湯気
-    steam.classList.remove('on'); void steam.offsetWidth; steam.classList.add('on');
-
-    // 2.2秒後：カード＋妖精A
-    setTimeout(()=>{
-      show(card,'floatIn .6s cubic-bezier(.22,1,.36,1) forwards');
-      show(talkerA,'fadeIn .32s ease-out forwards');
-
-      // さらに 0.7 秒後：吹き出し＋B＋ボタン
-      setTimeout(()=>{
-        show(talkerB,'bounceIn .34s cubic-bezier(.12,.8,.2,1.1) forwards');
-        show(balloon,'popIn .24s ease-out forwards');
-        show(balloonText,'fadeIn .22s ease-out forwards');
-        btns.classList.add('on');
-        playing = false;
-      },700);
-    },2200);
-  }
-/* === SmartPhone (〜480px) 調整だけ上書き === */
-@media (max-width: 480px){
-
-  /* カップ：少し小さく＋下げる */
-  .cup{
-    width: 54vw;      /* 64→54：小さく */
-    bottom: 8vh;      /* 14→8：下げる */
-  }
-
-  /* カード：少しだけ上へ＆広めに */
-  .card{
-    top: 6vh;         /* 8→6：上に */
-    width: 86%;       /* 82→86：広め */
-  }
-
-  /* 吹き出し＆テキスト：全体をちょい下げ＆広げる */
-  .balloon{
-    top: 33vh;        /* 30→33 */
-    width: 62vw;      /* 54→62 */
-  }
-  .balloonText{
-    top: 34.6vh;      /* 31.5→34.6 */
-    width: 56vw;      /* 48→56 */
-  }
-
-  /* 先に出る妖精A：カード右上で見切れないよう微調整 */
-  .talkerA{
-    left: 84%;
-    top: 15vh;
-    width: 20vw;      /* 18→20 */
-  }
-
-  /* ボタン行：間隔＆位置 */
-  .btns{
-    bottom: 3vh;      /* 2.4→3：少し上げる（見やすく） */
-    gap: 2.2vh;       /* 間隔ひろめ */
-  }
-
-  /* おかわりボタンの高さ（相対大きさの基準） */
-  #okawari{
-    height: 5.2vh;    /* 既定4.6→5.2 ちょい大きく */
-  }
-
-  /* ホーム看板だけ大きめに */
-  #homeLink img{
-    height: 6.4vh;    /* ←ここで看板をドンと大きく */
-  }
 }
-  // ===== イベント =====
-  cup.addEventListener('click', play, {passive:true});
-  okawari.addEventListener('click', ()=>{ init(); play(); }, {passive:true});
+init();
+
+/* ===== クリックの流れ =====
+   1) ヒント消える＋湯気
+   2) 2.0s後：カード＋妖精A
+   3) 0.7s後：吹き出し＋妖精B＋ボタン
+*/
+let playing = false;
+
+function play(){
+  if(playing) return; playing = true;
+
+  hide(hint);
+  show(steam);    steam.classList.add('on'); // 湯気アニメ
+
+  // 結果抽選
+  const f = fortunes[Math.floor(Math.random()*fortunes.length)];
+  title.innerHTML = f.t;
+  body.textContent = f.b;
+  balloonText.textContent = f.q;
+
+  // 2秒後：カード＋A
+  setTimeout(()=>{
+    show(card,'floatIn .60s cubic-bezier(.22,1,.36,1) forwards');
+    show(talkerA,'fadeIn .28s ease-out forwards');
+
+    // さらに0.7秒後：吹き出し＋B＋ボタン
+    setTimeout(()=>{
+      show(balloon,'popIn .26s ease-out forwards');
+      show(balloonText,'fadeIn .22s ease-out forwards');
+      show(talkerB,'bounceIn .34s cubic-bezier(.12,.8,.2,1.1) forwards');
+      btns.classList.add('on');
+      playing = false;
+    }, 700);
+  }, 2000);
+}
+
+/* ===== イベント ===== */
+cup.addEventListener('click', play, {passive:true});
+okawari.addEventListener('click', ()=>{ init(); play(); }, {passive:true});
 </script>
 </body>
 </html>
-
