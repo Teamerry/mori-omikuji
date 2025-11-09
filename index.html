@@ -16,58 +16,70 @@
 
 <style>
 :root{ --ink:#5a3b25; }
+
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body{ height:100%; }
 body{
   margin:0; color:var(--ink);
-  font-family: system-ui,-apple-system,"Noto Sans JP","Noto Sans",sans-serif;
+  font-family:system-ui,-apple-system,"Noto Sans JP","Noto Sans",sans-serif;
   background:url('bg_forest.png') center/cover no-repeat fixed;
   display:grid; place-items:center;
 }
-.app{ width:min(480px,100vw); height:100dvh; position:relative; overflow:hidden; }
+
+/* ===== レイアウトの器（デスクトップは広め） ===== */
+.app{ width:min(640px, 92vw); height:100dvh; position:relative; overflow:hidden; }
 .stage{ position:absolute; inset:0; padding:16px; }
 .center{ position:absolute; inset:0; }
 
-/* card */
-.card{ position:absolute; top:10vh; left:50%; transform:translateX(-50%); width:min(88%,420px); opacity:0; z-index:2; }
+/* ===== カード ===== */
+.card{
+  position:absolute; left:50%; transform:translateX(-50%);
+  top:8vh; width:min(88%, 520px); opacity:0; z-index:2;
+}
 .card img{ width:100%; display:block; }
-.card .t1{ position:absolute; inset:0; display:grid; align-content:start; padding:22px 22px 4px; font-weight:800; font-size:clamp(22px,6.2vw,28px); line-height:1.15; }
-.card .t2{ position:absolute; left:22px; right:22px; bottom:18px; font-size:clamp(13px,4.2vw,15.5px); line-height:1.75; }
+.card .t1{
+  position:absolute; inset:0; display:grid; align-content:start;
+  padding:22px 22px 6px;
+  font-weight:800; font-size:clamp(22px, 2.8vw, 30px); line-height:1.15;
+}
+.card .t2{
+  position:absolute; left:22px; right:22px; bottom:18px;
+  font-size:clamp(13px, 1.4vw, 16px); line-height:1.75;
+}
 
-/* hint (JSで位置調整 / クリックの邪魔しない) */
+/* ===== ヒント（常にカップの下・クリック邪魔しない） ===== */
 .hint{
   position:absolute; left:50%; transform:translateX(-50%);
   padding:8px 14px; border-radius:999px;
   background:rgba(255,255,255,.92); color:#5a3b25;
-  font-weight:700; font-size:14px;
+  font-weight:700; font-size:14px; pointer-events:none;
   box-shadow:0 6px 14px rgba(71,52,41,.12);
-  pointer-events:none; opacity:0; z-index:1;
-  transition:opacity .2s ease;
-}
-@keyframes hintPulse{
-  0%,100%{ transform:translateX(-50%) translateY(0); opacity:.95 }
-  50%{    transform:translateX(-50%) translateY(-2px); opacity:1 }
+  opacity:0; z-index:1; transition:opacity .2s ease;
 }
 
-/* balloon & fairies */
-.balloon{ position:absolute; width:62%; max-width:300px; opacity:0; z-index:3; }
-.balloonText{ position:absolute; width:56%; max-width:270px; padding:14px 10px; text-align:center; font-weight:700; opacity:0; z-index:3; }
-.talkerA{ position:absolute; width:22%; max-width:110px; opacity:0; z-index:2; filter:drop-shadow(0 8px 16px rgba(71,52,41,.22)); }
-.talkerB{ position:absolute; width:24%; max-width:120px; opacity:0; z-index:3; filter:drop-shadow(0 8px 16px rgba(71,52,41,.22)); }
+/* ===== ふきだし＆妖精 ===== */
+.balloon{ position:absolute; width:min(62%, 320px); opacity:0; z-index:3; }
+.balloonText{
+  position:absolute; width:min(56%, 300px); padding:14px 10px;
+  text-align:center; font-weight:700; opacity:0; z-index:3;
+  font-size:clamp(13px, 1.4vw, 16px);
+}
+.talkerA{ position:absolute; width:min(22%,120px); opacity:0; z-index:2;
+  filter:drop-shadow(0 8px 16px rgba(71,52,41,.22)); }
+.talkerB{ position:absolute; width:min(24%,130px); opacity:0; z-index:3;
+  filter:drop-shadow(0 8px 16px rgba(71,52,41,.22)); }
 
-/* cup */
+/* ===== カップ ===== */
 .cup{
   position:absolute; left:50%; transform:translateX(-50%);
-  bottom:9vh; width:clamp(230px,60vw,420px);
-  cursor:pointer; filter:drop-shadow(0 10px 16px rgba(71,52,41,.25)); z-index:1;
+  bottom:10vh; width:clamp(240px, 52vw, 480px);
+  cursor:pointer; z-index:1;
+  filter:drop-shadow(0 10px 16px rgba(71,52,41,.25));
 }
 .cup:active{ transform:translateX(-50%) translateY(1px) scale(.996); }
 
-/* steam */
-.steam{
-  position:absolute; left:50%; transform:translateX(-50%);
-  width:120px; height:120px; pointer-events:none; z-index:2;
-}
+/* 湯気（CSS） */
+.steam{ position:absolute; left:50%; transform:translateX(-50%); width:120px; height:120px; pointer-events:none; z-index:2; }
 .steam i{
   position:absolute; bottom:0; width:36px; height:62px; left:50%; margin-left:-18px;
   background:
@@ -85,17 +97,17 @@ body{
   100%{ opacity:0; transform:translateY(-80px) scale(1.06); }
 }
 
-/* buttons */
+/* ===== ボタン ===== */
 .btns{
   position:absolute; left:0; right:0; bottom:18px;
-  display:flex; justify-content:center; gap:16px; z-index:4;
-  opacity:0; pointer-events:none; transition:opacity .28s ease-out;
+  display:flex; justify-content:center; gap:min(18px,3vw);
+  z-index:4; opacity:0; pointer-events:none; transition:opacity .28s ease-out;
 }
 .btns.on{ opacity:1; pointer-events:auto; }
-.btns img{ height:44px; object-fit:contain; cursor:pointer; filter:drop-shadow(0 6px 12px rgba(71,52,41,.18)); }
-#homeLink img{ height:56px; }
+#okawari{ height:44px; object-fit:contain; filter:drop-shadow(0 6px 12px rgba(71,52,41,.18)); cursor:pointer; }
+#homeLink img{ height:58px; object-fit:contain; filter:drop-shadow(0 6px 12px rgba(71,52,41,.18)); }
 
-/* animation helpers */
+/* ===== アニメ ===== */
 .fadeIn{ animation:fadeIn .28s ease-out forwards; }
 .popIn{ animation:popIn .26s ease-out forwards; }
 .floatIn{ animation:floatIn .60s cubic-bezier(.22,1,.36,1) forwards; }
@@ -109,12 +121,13 @@ body{
   100%{ opacity:1; transform:translateY(0) scale(1); }
 }
 
-/* mobile tweak */
-@media (max-width:480px){
+/* ===== モバイル微調整 ===== */
+@media (max-width:520px){
+  .app{ width:100vw; }
   .cup{ width:56vw; bottom:8.2vh; }
-  #homeLink img{ height:8.2vh; }
-  .btns{ bottom:2.4vh; gap:2.2vh; }
-  #okawari{ height:6.2vh; }
+  #homeLink img{ height:8.6vh; }
+  #okawari{ height:6.4vh; }
+  .btns{ bottom:calc(14px + env(safe-area-inset-bottom,0)); }
 }
 </style>
 </head>
@@ -123,13 +136,16 @@ body{
 <main class="app" role="application" aria-label="森のおみくじ">
   <section class="stage">
     <div class="center" id="center">
+      <!-- カップ -->
       <img id="cup" class="cup" src="cup.png" alt="ティーカップ">
+
+      <!-- ヒント（JSでカップの下に追従） -->
       <div id="hint" class="hint">カップをクリックしてね</div>
 
-      <!-- steam (位置はJSでカップ上に置く) -->
+      <!-- 湯気 -->
       <div id="steam" class="steam" aria-hidden="true"><i></i><i></i><i></i></div>
 
-      <!-- card -->
+      <!-- 結果カード -->
       <figure id="card" class="card" aria-live="polite">
         <img src="card_base.png" alt="">
         <figcaption>
@@ -138,13 +154,16 @@ body{
         </figcaption>
       </figure>
 
-      <!-- fairies & balloon -->
+      <!-- 妖精A（カードと同時） -->
       <img id="talkerA" class="talkerA" src="fairy.png" alt="森の精霊">
+
+      <!-- 吹き出し & テキスト & ツッコミB -->
       <img id="balloon" class="balloon" src="balloon.png" alt="">
       <div id="balloonText" class="balloonText"></div>
       <img id="talkerB" class="talkerB" src="fairy.png" alt="ツッコミ役">
     </div>
 
+    <!-- ボタン -->
     <div class="btns" id="btns">
       <img id="okawari" src="okawari.png" alt="おかわり？">
       <a id="homeLink" href="#"><img src="home_sign.png" alt="TeaMerryの森へ"></a>
@@ -153,8 +172,8 @@ body{
 </main>
 
 <script>
+/* ===== 要素 ===== */
 const app = document.querySelector('.app');
-const center = document.getElementById('center');
 const cup = document.getElementById('cup');
 const hint = document.getElementById('hint');
 const steam = document.getElementById('steam');
@@ -169,10 +188,10 @@ const btns = document.getElementById('btns');
 const okawari = document.getElementById('okawari');
 const homeLink = document.getElementById('homeLink');
 
-// ★HOMEリンク
+/* ===== HOMEリンク（Wix URLに差し替え） ===== */
 homeLink.href = 'https://あなたのWixホームURL';
 
-// fortunes
+/* ===== おみくじデータ ===== */
 const fortunes = [
   {t:'ほかほか<br>大吉', b:'あたたかい飲み物を両手で包むように、あなたのまわりにも静かなぬくもりが集まる日。どんな話も、湯気の向こうでやさしくまとまっていきます。', q:'あったまったら、やさしさもよく出る。'},
   {t:'もこもこ<br>中吉', b:'誰かの笑い声が、不意にあなたをやわらげる。無理に元気を出さなくても、湯気のように気持ちは上向き。今日は、笑われるより笑う方がお得です。', q:'笑いジワ、今日のラッキー線。'},
@@ -180,110 +199,56 @@ const fortunes = [
   {t:'ティーバッグ<br>末吉', b:'少し渋い一日。でも、その渋みが深みになる。お湯の中で静かに広がるように、ゆっくり整っていく運気。今日は焦らず、ほどよく染み出す時間を楽しんで。', q:'渋みはコクの予告状。'}
 ];
 
-// utilities
-function hide(el){ el.style.opacity=0; el.style.animation='none'; }
-function show(el,anim){ el.style.opacity=1; if(anim) el.style.animation=anim; }
+/* ===== ユーティリティ ===== */
+const hide = el => { el.style.opacity=0; el.style.animation='none'; };
+const show = (el,anim)=>{ el.style.opacity=1; if(anim) el.style.animation=anim; };
 
-// ヒントと湯気の位置をカップに追従
-function placeCupDependents(){
-  const r = cup.getBoundingClientRect();
+/* カップ基準でヒント＆湯気の位置を追従 */
+function placeHintAndSteam(){
   const base = app.getBoundingClientRect();
-  const cupTopInApp = r.top - base.top;
-  const cupLeftInApp = r.left - base.left;
+  const r = cup.getBoundingClientRect();
+  const x = r.left - base.left + r.width/2;
+  const topInApp = r.top - base.top;
 
-  // ヒント：カップの少し下（クリック邪魔しない）
-  hint.style.left = (cupLeftInApp + r.width/2) + 'px';
-  hint.style.top  = (cupTopInApp + r.height + Math.max(8, window.innerHeight*0.012)) + 'px';
+  // ヒント（カップの下で少し離す / クリックの邪魔しない）
+  hint.style.left = x + 'px';
+  hint.style.top  = (topInApp + r.height + Math.max(10, window.innerHeight*0.012)) + 'px';
   hint.style.transform = 'translateX(-50%)';
   hint.style.opacity = 1;
 
-  // 湯気：カップ上
-  steam.style.left = (cupLeftInApp + r.width/2) + 'px';
-  steam.style.top  = (cupTopInApp - 60) + 'px'; // だいたい上に
+  // 湯気（カップの少し上）
+  steam.style.left = x + 'px';
+  steam.style.top  = (topInApp - 60) + 'px';
   steam.style.transform = 'translateX(-50%)';
 }
 
-// カードの実測から吹き出し/妖精の位置を決める
+/* カードの実寸から、吹き出し＆妖精の安全位置を計算 */
 function placeSpeech(){
   const base = app.getBoundingClientRect();
   const r = card.getBoundingClientRect();
 
-  const marginY = Math.max(8, window.innerHeight * 0.012);
-  const baseTop = (r.bottom - base.top) + marginY;          // カードの下ちょい下
-  const centerX = (r.left - base.left) + r.width * 0.55;     // 右寄り
+  const gap = Math.max(12, app.clientHeight * 0.02); // カードとの隙間
+  const below = (r.bottom - base.top) + gap;         // カードの下に置く
+  const rightBias = r.left - base.left + r.width*0.6;
 
-  balloon.style.top = baseTop + 'px';
-  balloon.style.left = centerX + 'px';
+  balloon.style.top = below + 'px';
+  balloon.style.left = rightBias + 'px';
   balloon.style.transform = 'translateX(-50%)';
 
-  balloonText.style.top = (baseTop + 14) + 'px';
-  balloonText.style.left = centerX + 'px';
+  balloonText.style.top = (below + 12) + 'px';
+  balloonText.style.left = rightBias + 'px';
   balloonText.style.transform = 'translateX(-50%)';
 
-  talkerB.style.top  = (baseTop + 28) + 'px';
-  talkerB.style.left = (centerX + r.width * 0.28) + 'px';
+  // ツッコミ妖精Bは吹き出しの右外側
+  const bRect = balloon.getBoundingClientRect();
+  talkerB.style.top  = (bRect.top - base.top + bRect.height*0.15) + 'px';
+  talkerB.style.left = (bRect.left - base.left + bRect.width*0.95) + 'px';
 
-  // Aはカード右上
+  // 妖精Aはカード右上に固定
   talkerA.style.top  = (r.top - base.top + 8) + 'px';
   talkerA.style.left = (r.right - base.left - talkerA.getBoundingClientRect().width - 8) + 'px';
 }
 
-// 初期化
+/* 初期化（最初はカップ＋ヒントのみ） */
 function init(){
-  [card, balloon, balloonText, talkerA, talkerB].forEach(hide);
-  btns.classList.remove('on');
-  steam.classList.remove('on');
-  title.innerHTML=''; body.textContent=''; balloonText.textContent='';
-  placeCupDependents();
-}
-init();
-
-let playing = false;
-
-function play(){
-  if(playing) return;
-  playing = true;
-
-  // ヒント消す
-  hint.style.opacity = 0;
-
-  // 湯気
-  steam.classList.remove('on'); void steam.offsetWidth; steam.classList.add('on');
-
-  // 結果セット
-  const f = fortunes[Math.floor(Math.random()*fortunes.length)];
-  title.innerHTML = f.t;
-  body.textContent = f.b;
-  balloonText.textContent = f.q;
-
-  // 2秒後：カード＋A
-  setTimeout(()=>{
-    show(card,'floatIn .6s cubic-bezier(.22,1,.36,1) forwards');
-    show(talkerA,'fadeIn .28s ease-out forwards');
-    placeSpeech();
-
-    // 0.7秒後：吹き出し＋B＋ボタン
-    setTimeout(()=>{
-      show(balloon,'popIn .26s ease-out forwards');
-      show(balloonText,'fadeIn .22s ease-out forwards');
-      show(talkerB,'bounceIn .34s cubic-bezier(.12,.8,.2,1.1) forwards');
-      btns.classList.add('on');
-      playing = false;
-    }, 700);
-  }, 2000);
-}
-
-// events
-cup.addEventListener('click', play, {passive:true});
-okawari.addEventListener('click', ()=>{ init(); play(); }, {passive:true});
-window.addEventListener('resize', ()=>{
-  placeCupDependents();
-  if(card.style.opacity>0) placeSpeech();
-}, {passive:true});
-document.addEventListener('visibilitychange', ()=>{
-  // タブ復帰でヒントが変な場所に行くのを防ぐ
-  if(document.visibilityState==='visible') placeCupDependents();
-});
-</script>
-</body>
-</html>
+  [card, balloon,
