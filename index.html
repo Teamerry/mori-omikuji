@@ -8,40 +8,33 @@
 <style>
   /* ===== 可変パラメータ（まずここだけ調整） ===== */
   :root{
-    /* カード（上ゾーン） */
-    --card-top: 6vh;            /* 上からの距離 */
-    --card-w: 86vw;             /* カード幅 */
-    --card-max: 600px;          /* カード最大幅 */
-    --card-zone-h: 44vh;        /* カードが使う縦ゾーン（下に行き過ぎないための上限） */
+    --card-top: 6vh;
+    --card-w: 86vw;
+    --card-max: 600px;
+    --card-zone-h: 44vh;
 
-    /* 上の小妖精（カード右上あたり） */
-    --fairy-top-x: 82%;         /* X位置（カード幅に対する%） */
-    --fairy-top-y: 8%;          /* Y位置（カード高さに対する%） */
-    --fairy-top-w: 15vw;        /* 幅 */
-    --fairy-top-w-max: 90px;    /* 最大幅 */
+    --fairy-top-x: 82%;
+    --fairy-top-y: 8%;
+    --fairy-top-w: 15vw;
+    --fairy-top-w-max: 90px;
 
-    /* カップ（下） */
     --cup-w: 62vw;
     --cup-w-max: 520px;
-    --cup-bottom: 14vh;         /* 画面下からの距離 */
+    --cup-bottom: 14vh;
 
-    /* 吹き出し（カップの上。読めればカップは多少隠れてOK） */
     --balloon-w: 68vw;
     --balloon-w-max: 520px;
-    --balloon-bottom-gap: 20vh; /* 画面下から＝カップより上に固定 */
-    --balloon-center-shift: 8%; /* 中央から右へ寄せる（＋で右） */
+    --balloon-bottom-gap: 20vh;
+    --balloon-center-shift: 8%;
 
-    /* ツッコミ妖精（吹き出しの右に固定） */
     --buddy-w: 22vw;
     --buddy-w-max: 140px;
-    --buddy-x-gap: 6%;          /* 吹き出し右端からの余白 */
-    --buddy-y-gap: 6%;          /* 吹き出し上端からの余白 */
+    --buddy-x-gap: 6%;
+    --buddy-y-gap: 6%;
 
-    /* ヒント（最初だけ表示） */
     --hint-gap: 10px;
   }
 
-  /* PC幅で上書き（900px～） */
   @media (min-width:900px){
     :root{
       --card-top: 70px;
@@ -68,18 +61,18 @@
     }
   }
 
-  /* ===== ベース ===== */
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ height:100%; margin:0; }
   body{
     font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
     color:#5a3b25;
-    background:#f1e6d1 url('bg_forest.jpg') center/cover no-repeat fixed;
+    background:#f1e6d1 url('bg_forest.png') center/cover no-repeat fixed;
     display:grid; place-items:center;
   }
+
   .app{ position:relative; width:min(980px,100%); height:100dvh; overflow:hidden; }
 
-  /* ===== カード（上ゾーンで完結） ===== */
+  /* カード */
   .card-wrap{
     position:absolute; left:50%; top:var(--card-top); transform:translateX(-50%);
     width:min(var(--card-w), var(--card-max));
@@ -91,7 +84,7 @@
   .t1{ top:18px; font-weight:800; font-size:clamp(22px,4.2vw,38px); line-height:1.15; }
   .t2{ bottom:16px; font-size:clamp(13px,2.9vw,18px); line-height:1.9; }
 
-  /* 上の固定妖精（カードの右上に相対配置） */
+  /* 上の妖精（カードの右上） */
   .fairy-top{
     position:absolute;
     width:min(var(--fairy-top-w), var(--fairy-top-w-max));
@@ -102,7 +95,7 @@
     filter:drop-shadow(0 6px 14px rgba(71,52,41,.22));
   }
 
-  /* ===== 吹き出し（カップのひとつ上／中央やや右） ===== */
+  /* 吹き出し */
   .balloon{
     position:absolute;
     left:calc(50% + var(--balloon-center-shift));
@@ -128,15 +121,16 @@
     filter:drop-shadow(0 8px 16px rgba(71,52,41,.22));
   }
 
-  /* ===== カップ（下） ===== */
+  /* カップ */
   .cup{
     position:absolute; left:50%; bottom:var(--cup-bottom); transform:translateX(-50%);
     width:min(var(--cup-w), var(--cup-w-max)); cursor:pointer; z-index:2;
     filter:drop-shadow(0 12px 22px rgba(71,52,41,.28));
   }
+
   .cup:active{ transform:translateX(-50%) translateY(1px) scale(.997); }
 
-  /* ヒント（最初だけ） */
+  /* ヒント */
   .hint{
     position:absolute; left:50%; bottom:calc(var(--cup-bottom) - var(--hint-gap));
     transform:translate(-50%, 100%);
@@ -145,6 +139,7 @@
     box-shadow:0 6px 14px rgba(71,52,41,.12); opacity:.95;
     animation:hint 1.8s ease-in-out infinite;
   }
+
   @keyframes hint{
     0%,100%{ transform:translate(-50%, 100%) }
     50%{    transform:translate(-50%, 90%) }
@@ -159,6 +154,7 @@
   .fadeIn{ animation:fadeIn .35s ease-out forwards; }
   .popIn{  animation:popIn  .26s ease-out forwards; }
   .floatIn{animation:floatIn .6s cubic-bezier(.22,1,.36,1) forwards; }
+
   @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
   @keyframes popIn { from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)} }
   @keyframes floatIn{ from{opacity:0; transform:translate(-50%,16px)} to{opacity:1; transform:translate(-50%,0)} }
@@ -166,7 +162,6 @@
 </head>
 <body>
   <main class="app" role="application" aria-label="森のおみくじ">
-    <!-- カード上ゾーン -->
     <figure id="card" class="card-wrap" aria-live="polite">
       <img src="card_base.png" alt="">
       <figcaption>
@@ -175,10 +170,10 @@
       </figcaption>
     </figure>
 
-    <!-- カード右上の小妖精（固定） -->
-    <img id="fairyTop" class="fairy-top" src="fairy_top.png" alt="森の精霊">
+    <!-- 上の固定妖精 -->
+    <img id="fairyTop" class="fairy-top" src="fairy.png" alt="森の妖精">
 
-    <!-- 吹き出し（カップの上に固定・中央やや右） -->
+    <!-- 吹き出しとキャラ -->
     <img id="balloon" class="balloon" src="balloon.png" alt="">
     <div id="balloonText" class="balloonText"></div>
     <img id="buddy" class="buddy" src="buddy.png" alt="ツッコミ役">
@@ -197,7 +192,6 @@
   </main>
 
 <script>
-  // 要素
   const cup = document.getElementById('cup');
   const hint = document.getElementById('hint');
   const card = document.getElementById('card');
@@ -211,10 +205,8 @@
   const okawari = document.getElementById('okawari');
   const homeLink = document.getElementById('homeLink');
 
-  // ★リンク差し替え
   homeLink.href = 'https://example.com';
 
-  // おみくじ
   const fortunes = [
     {t:'ほかほか<br>大吉', b:'あたたかい飲み物を両手で包むように、あなたのまわりにも静かなぬくもりが集まる日。どんな話も、湯気の向こうでやさしくまとまっていきます。', q:'あったまったら、やさしさもよく出る。'},
     {t:'もこもこ<br>中吉', b:'誰かの笑い声が、不意にあなたをやわらげる。無理に元気を出さなくても、湯気のように気持ちは上向き。今日は、笑われるより笑う方がお得です。', q:'笑いジワ、今日のラッキー線。'},
@@ -241,7 +233,6 @@
     body.textContent = f.b;
     balloonText.textContent = f.q;
 
-    // カード → 上の妖精 → 吹き出し → ボタン
     setTimeout(()=>{ show(card,'floatIn'); }, 200);
     setTimeout(()=>{ show(fairyTop,'fadeIn'); }, 500);
     setTimeout(()=>{ show(balloon,'popIn'); show(balloonText,'fadeIn'); show(buddy,'fadeIn'); }, 900);
